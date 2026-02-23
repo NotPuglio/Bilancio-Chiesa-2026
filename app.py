@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+
 st.set_page_config(page_title="Bilancio Parrocchiale", page_icon="⛪")
 
 st.title("⛪ Bilancio Parrocchiale")
@@ -55,3 +56,4 @@ try:
 except Exception as e:
     st.error(f"Errore tecnico: {e}")
     st.info("Controlla che i numeri nel foglio non abbiano il simbolo € scritto a mano.")
+
