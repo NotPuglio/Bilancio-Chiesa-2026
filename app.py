@@ -12,7 +12,7 @@ st.write("Pagina per la trasparenza finanziaria della comunità.")
 URL_FOGLIO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQdOvvH12V14IK6aAnK-22kmQNhoLiya9rHcV9ONHNMwU_QT4vx4jDDXz6SBj1az_Ln9fLlOzayxI3L/pub?output=csv"
 
 
-@st.cache_data(ttl=60)
+# @st.cache_data(ttl=60)
 def load_data(url):
     # Carichiamo i dati
     df = pd.read_csv(url)
@@ -66,6 +66,7 @@ try:
 except Exception as e:
     st.error(f"Errore tecnico: {e}")
     st.info("Controlla che i numeri nel foglio non abbiano il simbolo € scritto a mano.")
+
 
 
 
