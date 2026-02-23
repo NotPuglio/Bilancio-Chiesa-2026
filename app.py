@@ -31,6 +31,14 @@ def load_data(url):
 try:
     df = load_data(URL_FOGLIO)
 
+    # --- TEST VISIVO (Rimuoveremo questo quando funziona) ---
+    st.subheader("DEBUG: Cosa vede il sistema?")
+    st.write(df) # Questo mostrerà la tabella ESATTA che arriva da Google
+    # -------------------------------------------------------
+
+    # Pulizia forzata: assicuriamoci che Importo sia un numero
+    df['Importo'] = pd.to_numeric(df['Importo'], errors='coerce').fillna(0)
+
     # Calcoli
     entrate = df[df['Importo'] > 0]['Importo'].sum()
     uscite = abs(df[df['Importo'] < 0]['Importo'].sum())
@@ -42,6 +50,7 @@ try:
     c2.metric("Uscite", f"€ {uscite:,.2f}")
     c3.metric("Saldo", f"€ {saldo:,.2f}")
 
+    # ... resto del codice (grafici ecc.)
     st.divider()
 
     # Grafico a barre (più chiaro per i bilanci)
@@ -56,4 +65,5 @@ try:
 except Exception as e:
     st.error(f"Errore tecnico: {e}")
     st.info("Controlla che i numeri nel foglio non abbiano il simbolo € scritto a mano.")
+
 
