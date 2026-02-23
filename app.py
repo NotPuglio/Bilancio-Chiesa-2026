@@ -4,78 +4,94 @@ import plotly.express as px
 import requests
 import io
 
-# --- 1. CONFIGURAZIONE PAGINA ---
-st.set_page_config(page_title="Bilancio Parrocchiale", page_icon="⛪", layout="wide")
+# --- 1. CONFIGURAZIONE ESTETICA ---
+st.set_page_config(
+    page_title="Bilancio Parrocchiale Online",
+    page_icon="⛪",
+    layout="centered" # "centered" è più elegante per questo tipo di report
+)
 
-st.title("⛪ Bilancio Parrocchiale")
-st.write("Versione con sistema di controllo avanzato")
+# CSS personalizzato per nascondere il menu Streamlit e pulire i font
+st.markdown("""
+    <style>
+    .main { background-color: #ffffff; }
+    div[data-testid="stMetricValue"] { font-size: 1.8rem; color: #1a5276; }
+    h1, h2, h3 { color: #1a5276; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+    </style>
+    """, unsafe_allow_input=True)
 
-# --- 2. IL TUO LINK (Assicurati che finisca con output=csv) ---
+# --- 2. CARICAMENTO DATI (Senza Cache per massima freschezza) ---
 URL_FOGLIO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQdOvvH12V14IK6aAnK-22kmQNhoLiya9rHcV9ONHNMwU_QT4vx4jDDXz6SBj1az_Ln9fLlOzayxI3L/pub?output=csv"
 
-# --- 3. PROVA DEL NOVE: FUNZIONE DI CARICAMENTO DIRETTO ---
-def load_data_robust(url):
+def load_clean_data(url):
     try:
-        # Forziamo il download saltando ogni memoria temporanea (cache)
-        response = requests.get(url, timeout=10)
-        
-        # Se Google risponde con un errore (es. 404 o 400) lo vedremo qui
-        if response.status_code != 200:
-            st.error(f"⚠️ Errore di connessione a Google Sheets: Codice {response.status_code}")
-            return pd.DataFrame() # Restituisce una tabella vuota in caso di errore
-            
-        # Leggiamo il testo ricevuto
-        testo_dati = response.text
-        
-        # Creiamo la tabella (DataFrame)
-        df = pd.read_csv(io.StringIO(testo_dati))
-        
-        # Pulizia forzata dei dati
-        if not df.empty:
-            # Rimuove righe totalmente vuote
-            df = df.dropna(how='all')
-            # Converte Importo in numero (gestendo virgole e punti)
-            df['Importo'] = df['Importo'].astype(str).str.replace(',', '.')
-            df['Importo'] = pd.to_numeric(df['Importo'], errors='coerce').fillna(0)
-            # Converte Data
-            df['Data'] = pd.to_datetime(df['Data'], errors='coerce')
-            
-        return df
-    except Exception as e:
-        st.error(f"❌ Errore critico nel caricamento: {e}")
+        response = requests.get(url, timeout=15)
+        if response.status_code == 200:
+            df = pd.read_csv(io.StringIO(response.text))
+            if not df.empty:
+                # Pulizia formati
+                df['Importo'] = df['Importo'].astype(str).str.replace(',', '.')
+                df['Importo'] = pd.to_numeric(df['Importo'], errors='coerce').fillna(0)
+                df['Data'] = pd.to_datetime(df['Data'], errors='coerce')
+                df = df.dropna(subset=['Importo', 'Data'])
+                return df
+        return pd.DataFrame()
+    except:
         return pd.DataFrame()
 
-# --- 4. ESECUZIONE E DEBUG ---
-df = load_data_robust(URL_FOGLIO)
+# --- 3. LOGICA DELL'APP ---
+st.title("⛪ Rendiconto Finanziario")
+st.write("Iniziativa di trasparenza per la nostra comunità parrocchiale.")
+st.divider()
 
-# Area di monitoraggio (la rimuoveremo quando tutto sarà ok)
-with st.expander("🔍 Pannello di Controllo (Clicca per vedere i dati grezzi)"):
-    st.write(f"Stato: {'✅ Dati ricevuti' if not df.empty else '❌ Tabella vuota'}")
-    st.write("Righe totali trovate:", len(df))
-    st.write("Colonne trovate:", df.columns.tolist())
-    st.dataframe(df)
+df = load_clean_data(URL_FOGLIO)
 
 if not df.empty:
-    # --- 5. CALCOLI E VISUALIZZAZIONE ---
+    # --- CALCOLI ---
     entrate = df[df['Importo'] > 0]['Importo'].sum()
     uscite = abs(df[df['Importo'] < 0]['Importo'].sum())
     saldo = entrate - uscite
 
-    # Metriche
+    # --- VISUALIZZAZIONE METRICHE ---
     c1, c2, c3 = st.columns(3)
-    c1.metric("Entrate", f"€ {entrate:,.2f}")
-    c2.metric("Uscite", f"€ {uscite:,.2f}")
-    c3.metric("Saldo Attuale", f"€ {saldo:,.2f}")
+    c1.metric("Totale Entrate", f"€ {entrate:,.2f}")
+    c2.metric("Totale Uscite", f"€ {uscite:,.2f}")
+    c3.metric("Fondo Cassa attuale", f"€ {saldo:,.2f}")
 
     st.divider()
 
-    # Grafico
-    st.subheader("Andamento Fondi")
-    fig = px.bar(df, x='Data', y='Importo', color='Categoria', barmode='group')
-    st.plotly_chart(fig, use_container_width=True)
+    # --- GRAFICI ---
+    col_a, col_b = st.columns(2)
 
-    # Tabella
-    st.subheader("Dettaglio Movimenti")
-    st.dataframe(df.sort_values(by='Data', ascending=False), use_container_width=True)
+    with col_a:
+        st.subheader("Entrate vs Uscite")
+        # Un grafico a torta per mostrare la natura dei movimenti
+        df_pie = df.copy()
+        df_pie['Tipo'] = df_pie['Importo'].apply(lambda x: 'Entrata' if x > 0 else 'Uscita')
+        df_pie['Valore'] = df_pie['Importo'].abs()
+        fig_pie = px.pie(df_pie, values='Valore', names='Tipo', 
+                         color_discrete_map={'Entrata':'#2ecc71', 'Uscita':'#e74c3c'},
+                         hole=0.4)
+        st.plotly_chart(fig_pie, use_container_width=True)
+
+    with col_b:
+        st.subheader("Spese per Categoria")
+        # Solo uscite per capire dove vanno i soldi
+        df_uscite = df[df['Importo'] < 0].copy()
+        df_uscite['Importo'] = df_uscite['Importo'].abs()
+        fig_cat = px.bar(df_uscite, x='Categoria', y='Importo', 
+                         color_discrete_sequence=['#3498db'])
+        st.plotly_chart(fig_cat, use_container_width=True)
+
+    # --- TABELLA FINALE ---
+    st.subheader("Cronologia delle ultime operazioni")
+    st.dataframe(
+        df.sort_values(by='Data', ascending=False)[['Data', 'Descrizione', 'Categoria', 'Importo']],
+        use_container_width=True,
+        hide_index=True
+    )
+    
+    st.info("I dati vengono aggiornati periodicamente dal consiglio parrocchiale.")
+
 else:
-    st.warning("⚠️ Il sistema non ha trovato dati. Verifica il link su GitHub e la pubblicazione su Google Sheets.")
+    st.error("⚠️ Servizio momentaneamente non disponibile. Riprova più tardi.")
