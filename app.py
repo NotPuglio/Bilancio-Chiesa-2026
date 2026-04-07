@@ -12,7 +12,6 @@ st.set_page_config(
 )
 
 # --- 2. CODICE "INVISIBILITÀ" E ALLINEAMENTO LOGO (CSS) ---
-# Ho aggiunto una regola specifica (.stImage) per forzare l'allineamento a destra
 st.markdown("""
     <style>
     /* Nasconde Header, Menu e Footer */
@@ -37,7 +36,6 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # --- 3. TITOLO E LOGO PICCOLO (Affiancati) ---
-# Usiamo una proporzione drastica (10 a 1) per tenere la colonna del logo stretta
 col_testo, col_logo = st.columns([10, 1])
 
 with col_testo:
@@ -45,12 +43,10 @@ with col_testo:
     st.write("Riepilogo delle entrate e donazioni della nostra comunità.")
 
 with col_logo:
-# --- MODIFICA QUI ---
-    # Abbiamo rimosso 'use_container_width=True'
-    # Abbiamo aggiunto 'width=80' (pixel). Puoi cambiare questo numero per regolarlo.
+    # Mostra il logo avventista che hai caricato su GitHub
     st.image("adventist-symbol--black.svg", width=80)
 
-# INSERISCI QUI IL TUO LINK CSV
+# IL TUO LINK CSV
 URL_FOGLIO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRxmWYgGezaj5koTH_jaPV6cB6mYbb0s3mor-9yR8X-Op1Jrhhc4a1A3DaNdXt9lR_pkKssPX2tbOP6/pub?gid=0&single=true&output=csv"
 
 def load_data_robust(url):
@@ -78,19 +74,19 @@ if not df.empty:
     st.metric("Fondi Totali Raccolti nel 2026", f"€ {totale_entrate:,.2f}")
     st.divider()
 
-    # --- GRAFICI (RAGGRUPPATI PER CATEGORIA) ---
-    df_categorie = df.groupby('Categoria')['Importo'].sum().reset_index()
-    df_categorie = df_categorie.sort_values(by='Importo', ascending=False)
-
+    # --- GRAFICI ---
     col1, col2 = st.columns(2)
+    
     with col1:
         st.subheader("📊 Distribuzione %")
+        # Per la torta raggruppiamo solo per categoria
+        df_categorie = df.groupby('Categoria')['Importo'].sum().reset_index()
         fig_pie = px.pie(df_categorie, values='Importo', names='Categoria', hole=0.4)
         st.plotly_chart(fig_pie, use_container_width=True)
 
     with col2:
         st.subheader("📈 Andamento Giornaliero")
-        # NUOVO ISTOGRAMMA: Raggruppiamo per Data E Categoria
+        # Per l'istogramma raggruppiamo per Data E Categoria
         df_andamento = df.groupby(['Data', 'Categoria'])['Importo'].sum().reset_index()
         
         fig_bar = px.bar(
@@ -99,38 +95,41 @@ if not df.empty:
             y='Importo', 
             color='Categoria',
             barmode='group', # Mette le colonne affiancate per lo stesso giorno
-            labels={'Importo': 'Incasso (€)'}
+            labels={'Importo': 'Totale (€)'}
         )
         
-        # Rendiamo l'asse X (Date) più leggibile, togliamo i numeri automatici sopra le barre 
-        # perché sarebbero troppi, e mettiamo la legenda in basso
+        # Rendiamo l'asse X (Date) più leggibile e mettiamo la legenda in basso
         fig_bar.update_layout(
             xaxis_title="Data",
             yaxis_title="Euro",
             legend=dict(orientation="h", yanchor="bottom", y=-0.3, xanchor="center", x=0.5)
         )
-        # Forza Plotly a mostrare le barre per ogni data senza raggrupparle per mese
+        # Forza Plotly a mostrare le barre per ogni data senza raggruppare i giorni vuoti
         fig_bar.update_xaxes(type='category')
         
         st.plotly_chart(fig_bar, use_container_width=True)
 
     st.divider()
+
+    # --- 4. CRONOLOGIA RAGGRUPPATA PER DATA ---
+    st.subheader("📑 Cronologia entrate")
     
-    # Cronologia giornaliera (invariata)
-    st.subheader("📑 Totale giornaliero entrate")
+    # Raggruppiamo solo per Data e sommiamo l'Importo
     df_giornaliero = df.groupby('Data')['Importo'].sum().reset_index()
+    
+    # Ordiniamo dalla data più recente
     df_giornaliero = df_giornaliero.sort_values(by='Data', ascending=False)
     
+    # Mostriamo la tabella con solo Data e Importo Totale
     st.dataframe(
         df_giornaliero,
         use_container_width=True,
         hide_index=True,
         column_config={
             "Data": st.column_config.DateColumn("Giorno"),
-            "Importo": st.column_config.NumberColumn("Totale Incassato", format="€ %.2f")
+            "Importo": st.column_config.NumberColumn("Importo totale", format="€ %.2f")
         }
     )
-else:
-    st.info("Caricamento dati in corso...")
+
 else:
     st.info("Caricamento dati in corso...")
