@@ -6,7 +6,7 @@ import io
 
 # --- 1. CONFIGURAZIONE PAGINA ---
 st.set_page_config(
-    page_title="Rendiconto Parrocchiale",
+    page_title="Bilancio Chiesa Cristiana Avventista di Parma",
     page_icon="⛪",
     layout="wide"
 )
@@ -32,7 +32,7 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # --- 3. TITOLO E CONTENUTO ---
-st.title("⛪ Bilancio Trasparente della Parrocchia")
+st.title("⛪ Entrate raccolte durante le offerte")
 st.write("Riepilogo delle entrate e donazioni della nostra comunità.")
 
 # INSERISCI QUI IL TUO LINK CSV
@@ -45,10 +45,11 @@ def load_data_robust(url):
             return pd.DataFrame()
         df = pd.read_csv(io.StringIO(response.text))
         if not df.empty:
-            # Pulizia forzata dei numeri (Gestisce le virgole europee)
+            # Pulizia numeri (gestisce virgole e punti)
             df['Importo'] = df['Importo'].astype(str).str.replace(',', '.')
             df['Importo'] = pd.to_numeric(df['Importo'], errors='coerce').fillna(0)
-            df['Data'] = pd.to_datetime(df['Data'], errors='coerce')
+            # Conversione Date (fondamentale per il raggruppamento)
+            df['Data'] = pd.to_datetime(df['Data'], errors='coerce').dt.date
             df = df.dropna(subset=['Importo', 'Data'])
         return df
     except:
@@ -57,12 +58,12 @@ def load_data_robust(url):
 df = load_data_robust(URL_FOGLIO)
 
 if not df.empty:
-    # Calcolo Totale
+    # --- CALCOLO TOTALE GENERALE ---
     totale_entrate = df['Importo'].sum()
     st.metric("Fondi Totali Raccolti", f"€ {totale_entrate:,.2f}")
     st.divider()
 
-    # Raggruppamento per Categoria
+    # --- GRAFICI (RAGGRUPPATI PER CATEGORIA) ---
     df_categorie = df.groupby('Categoria')['Importo'].sum().reset_index()
     df_categorie = df_categorie.sort_values(by='Importo', ascending=False)
 
@@ -79,11 +80,26 @@ if not df.empty:
         st.plotly_chart(fig_bar, use_container_width=True)
 
     st.divider()
-    st.subheader("📑 Dettaglio Cronologico")
+
+    # --- 4. CRONOLOGIA RAGGRUPPATA PER DATA (Tua richiesta) ---
+    st.subheader("📑 Totale giornaliero entrate")
+    
+    # Raggruppiamo solo per Data e sommiamo l'Importo
+    df_giornaliero = df.groupby('Data')['Importo'].sum().reset_index()
+    
+    # Ordiniamo dalla data più recente
+    df_giornaliero = df_giornaliero.sort_values(by='Data', ascending=False)
+    
+    # Mostriamo la tabella con solo Data e Importo Totale
     st.dataframe(
-        df.sort_values(by='Data', ascending=False)[['Data', 'Descrizione', 'Categoria', 'Importo']],
+        df_giornaliero,
         use_container_width=True,
-        hide_index=True
+        hide_index=True,
+        column_config={
+            "Data": st.column_config.DateColumn("Giorno"),
+            "Importo": st.column_config.NumberColumn("Totale Incassato", format="€ %.2f")
+        }
     )
+
 else:
-    st.info("Caricamento dati in corso... (Se ci mette molto, fai una piccola modifica sul foglio Google per 'svegliarlo')")
+    st.info("Caricamento dati in corso...")
