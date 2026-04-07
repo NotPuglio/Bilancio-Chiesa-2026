@@ -11,36 +11,44 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- 2. CODICE "INVISIBILITÀ" NUCLEARE ---
+# --- 2. CODICE "INVISIBILITÀ" E ALLINEAMENTO LOGO (CSS) ---
+# Ho aggiunto una regola specifica (.stImage) per forzare l'allineamento a destra
 st.markdown("""
     <style>
-    /* Nasconde l'intera area dell'intestazione dove risiedono le icone */
+    /* Nasconde Header, Menu e Footer */
     [data-testid="stHeader"] {
         display: none !important;
         visibility: hidden !important;
-        opacity: 0 !important;
         pointer-events: none !important;
     }
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    .stAppDeployButton {display:none;}
+    [data-testid="stDecoration"] {display:none !important;}
+    [data-testid="stToolbar"] {display:none !important;}
     
-    /* Blocca i click su qualsiasi elemento fluttuante nell'angolo in alto a destra */
-    [data-testid="stToolbar"], .stAppDeployButton, .viewerBadge_container__1QSob {
-        display: none !important;
-        pointer-events: none !important;
-        z-index: -9999 !important;
+    /* TRUCCO PER IL LOGO: Forza l'allineamento a destra nella colonna */
+    [data-testid="column"]:last-of-type div.stImage {
+        text-align: right;
+        display: flex;
+        justify-content: flex-end;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. TITOLO E LOGO (Affiancati) ---
-col_testo, col_logo = st.columns([4, 1]) # 4 parti di spazio al testo, 1 parte al logo
+# --- 3. TITOLO E LOGO PICCOLO (Affiancati) ---
+# Usiamo una proporzione drastica (10 a 1) per tenere la colonna del logo stretta
+col_testo, col_logo = st.columns([10, 1])
 
 with col_testo:
     st.title("⛪ Entrate raccolte durante le offerte")
     st.write("Riepilogo delle entrate e donazioni della nostra comunità.")
 
 with col_logo:
-    # Mostra l'immagine. Assicurati che il nome sia identico a quello su GitHub
-    st.image("adventist-symbol--black.svg", use_container_width=True)
+# --- MODIFICA QUI ---
+    # Abbiamo rimosso 'use_container_width=True'
+    # Abbiamo aggiunto 'width=80' (pixel). Puoi cambiare questo numero per regolarlo.
+    st.image("logo.svg", width=80)
 
 # INSERISCI QUI IL TUO LINK CSV
 URL_FOGLIO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRxmWYgGezaj5koTH_jaPV6cB6mYbb0s3mor-9yR8X-Op1Jrhhc4a1A3DaNdXt9lR_pkKssPX2tbOP6/pub?gid=0&single=true&output=csv"
