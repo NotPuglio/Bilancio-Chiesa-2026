@@ -6,7 +6,7 @@ import io
 
 # --- 1. CONFIGURAZIONE ESTETICA ---
 st.set_page_config(
-    page_title="Rendiconto Parrocchiale",
+    page_title="Bilancio Chiesa Cristiana Avventista di Parma",
     page_icon="⛪",
     layout="wide" 
 )
