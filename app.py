@@ -31,9 +31,16 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. TITOLO E CONTENUTO ---
-st.title("⛪ Entrate raccolte durante le offerte")
-st.write("Riepilogo delle entrate e donazioni della nostra comunità.")
+# --- 3. TITOLO E LOGO (Affiancati) ---
+col_testo, col_logo = st.columns([4, 1]) # 4 parti di spazio al testo, 1 parte al logo
+
+with col_testo:
+    st.title("⛪ Entrate raccolte durante le offerte")
+    st.write("Riepilogo delle entrate e donazioni della nostra comunità.")
+
+with col_logo:
+    # Mostra l'immagine. Assicurati che il nome sia identico a quello su GitHub
+    st.image("adventist-symbol--black.svg", use_container_width=True)
 
 # INSERISCI QUI IL TUO LINK CSV
 URL_FOGLIO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRxmWYgGezaj5koTH_jaPV6cB6mYbb0s3mor-9yR8X-Op1Jrhhc4a1A3DaNdXt9lR_pkKssPX2tbOP6/pub?gid=0&single=true&output=csv"
