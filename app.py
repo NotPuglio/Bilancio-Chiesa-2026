@@ -89,32 +89,48 @@ if not df.empty:
         st.plotly_chart(fig_pie, use_container_width=True)
 
     with col2:
-        st.subheader("📈 Totali per Categoria")
-        fig_bar = px.bar(df_categorie, x='Categoria', y='Importo', color='Categoria')
-        fig_bar.update_layout(showlegend=False)
+        st.subheader("📈 Andamento Giornaliero")
+        # NUOVO ISTOGRAMMA: Raggruppiamo per Data E Categoria
+        df_andamento = df.groupby(['Data', 'Categoria'])['Importo'].sum().reset_index()
+        
+        fig_bar = px.bar(
+            df_andamento, 
+            x='Data', 
+            y='Importo', 
+            color='Categoria',
+            barmode='group', # Mette le colonne affiancate per lo stesso giorno
+            labels={'Importo': 'Incasso (€)'}
+        )
+        
+        # Rendiamo l'asse X (Date) più leggibile, togliamo i numeri automatici sopra le barre 
+        # perché sarebbero troppi, e mettiamo la legenda in basso
+        fig_bar.update_layout(
+            xaxis_title="Data",
+            yaxis_title="Euro",
+            legend=dict(orientation="h", yanchor="bottom", y=-0.3, xanchor="center", x=0.5)
+        )
+        # Forza Plotly a mostrare le barre per ogni data senza raggrupparle per mese
+        fig_bar.update_xaxes(type='category')
+        
         st.plotly_chart(fig_bar, use_container_width=True)
 
     st.divider()
-
-    # --- 4. CRONOLOGIA RAGGRUPPATA PER DATA (Tua richiesta) ---
-    st.subheader("📑 Cronologia entrate")
     
-    # Raggruppiamo solo per Data e sommiamo l'Importo
+    # Cronologia giornaliera (invariata)
+    st.subheader("📑 Totale giornaliero entrate")
     df_giornaliero = df.groupby('Data')['Importo'].sum().reset_index()
-    
-    # Ordiniamo dalla data più recente
     df_giornaliero = df_giornaliero.sort_values(by='Data', ascending=False)
     
-    # Mostriamo la tabella con solo Data e Importo Totale
     st.dataframe(
         df_giornaliero,
         use_container_width=True,
         hide_index=True,
         column_config={
             "Data": st.column_config.DateColumn("Giorno"),
-            "Importo": st.column_config.NumberColumn("Importo totale", format="€ %.2f")
+            "Importo": st.column_config.NumberColumn("Totale Incassato", format="€ %.2f")
         }
     )
-
+else:
+    st.info("Caricamento dati in corso...")
 else:
     st.info("Caricamento dati in corso...")
