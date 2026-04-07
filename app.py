@@ -48,7 +48,7 @@ with col_logo:
 # --- MODIFICA QUI ---
     # Abbiamo rimosso 'use_container_width=True'
     # Abbiamo aggiunto 'width=80' (pixel). Puoi cambiare questo numero per regolarlo.
-    st.image("logo.svg", width=80)
+    st.image("adventist-symbol--black.svg", width=80)
 
 # INSERISCI QUI IL TUO LINK CSV
 URL_FOGLIO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRxmWYgGezaj5koTH_jaPV6cB6mYbb0s3mor-9yR8X-Op1Jrhhc4a1A3DaNdXt9lR_pkKssPX2tbOP6/pub?gid=0&single=true&output=csv"
