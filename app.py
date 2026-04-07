@@ -11,18 +11,23 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- 2. CODICE "INVISIBILITÀ" (ORA CORRETTO: unsafe_allow_html=True) ---
+# --- 2. CODICE "INVISIBILITÀ" NUCLEARE ---
 st.markdown("""
     <style>
-    /* Nasconde il tasto GitHub e il menu in alto a destra */
-    #MainMenu {visibility: hidden;}
-    header {visibility: hidden;}
-    footer {visibility: hidden;}
+    /* Nasconde l'intera area dell'intestazione dove risiedono le icone */
+    [data-testid="stHeader"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
     
-    /* Rimuove i pulsanti fluttuanti di Streamlit */
-    .stAppDeployButton {display:none;}
-    [data-testid="stDecoration"] {display:none !important;}
-    [data-testid="stToolbar"] {display:none !important;}
+    /* Blocca i click su qualsiasi elemento fluttuante nell'angolo in alto a destra */
+    [data-testid="stToolbar"], .stAppDeployButton, .viewerBadge_container__1QSob {
+        display: none !important;
+        pointer-events: none !important;
+        z-index: -9999 !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
