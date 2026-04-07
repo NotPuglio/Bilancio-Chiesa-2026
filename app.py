@@ -60,7 +60,7 @@ df = load_data_robust(URL_FOGLIO)
 if not df.empty:
     # --- CALCOLO TOTALE GENERALE ---
     totale_entrate = df['Importo'].sum()
-    st.metric("Fondi Totali Raccolti", f"€ {totale_entrate:,.2f}")
+    st.metric("Fondi Totali Raccolti nel 2026", f"€ {totale_entrate:,.2f}")
     st.divider()
 
     # --- GRAFICI (RAGGRUPPATI PER CATEGORIA) ---
