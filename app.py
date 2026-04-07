@@ -16,7 +16,7 @@ st.title("⛪ Bilancio Trasparente della Parrocchia")
 st.write("Riepilogo delle entrate e donazioni della nostra comunità.")
 
 # --- 2. LINK DATI (Ricordati di inserire il tuo link CSV) ---
-URL_FOGLIO = "IL_TUO_LINK_QUI"
+URL_FOGLIO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQdOvvH12V14IK6aAnK-22kmQNhoLiya9rHcV9ONHNMwU_QT4vx4jDDXz6SBj1az_Ln9fLlOzayxI3L/pub?output=csv"
 
 # --- 3. CARICAMENTO E PULIZIA DATI ---
 def load_data_robust(url):
