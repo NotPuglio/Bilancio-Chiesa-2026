@@ -82,7 +82,7 @@ if not df.empty:
     st.divider()
 
     # --- 4. CRONOLOGIA RAGGRUPPATA PER DATA (Tua richiesta) ---
-    st.subheader("📑 Totale giornaliero entrate")
+    st.subheader("📑 Cronologia entrate")
     
     # Raggruppiamo solo per Data e sommiamo l'Importo
     df_giornaliero = df.groupby('Data')['Importo'].sum().reset_index()
@@ -97,7 +97,7 @@ if not df.empty:
         hide_index=True,
         column_config={
             "Data": st.column_config.DateColumn("Giorno"),
-            "Importo": st.column_config.NumberColumn("Totale Incassato", format="€ %.2f")
+            "Importo": st.column_config.NumberColumn("Importo totale", format="€ %.2f")
         }
     )
 
